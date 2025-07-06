@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Culinary Compass - Detailed Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e67e22;
+            --background-color: #f4f6f7;
+            --card-bg-color: #ffffff;
+            --text-color: #34495e;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --border-radius: 16px;
+            --box-shadow: 0 10px 25px rgba(44, 62, 80, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+        }
+
+        header .tagline {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+        }
+
+        #dish-input {
+            flex-grow: 1;
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            outline: none;
+        }
+
+        #search-button {
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            transition: background-color 0.3s ease;
+        }
+        #search-button:hover { background-color: #2980b9; }
+
+        .results-card {
+            background-color: var(--card-bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: left;
+            width: 100%;
+            display: none; 
+            animation: fadeIn 0.5s ease;
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #dish-image {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            display: block;
+            background-color: #eee;
+        }
+        
+        .result-content { padding: 35px; }
+        #dish-name { color: var(--primary-color); font-size: 2rem; margin-bottom: 20px; border-bottom: 3px solid var(--background-color); padding-bottom: 15px; }
+        .result-section { margin-bottom: 28px; }
+        .result-section h3 { color: var(--secondary-color); font-size: 1.3rem; margin-bottom: 12px; }
+        .result-section ul { list-style-type: none; padding-left: 5px; }
+        .result-section ul li { background-color: #f8f9fa; margin-bottom: 6px; padding: 10px 14px; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .alert-danger { background-color: #fdeded; color: #9c2a2a; border-left: 5px solid var(--danger-color); }
+        .alert-warning { background-color: #fff8e1; color: #8d6e63; border-left: 5px solid var(--warning-color); }
+        .alert-success { background-color: #eaf7ed; color: #1e6a34; border-left: 5px solid var(--success-color); }
+        .alert::before { font-size: 1.5rem; font-weight: bold; }
+        .alert-danger::before { content: '🔴'; }
+        .alert-warning::before { content: '⚠️'; }
+        .alert-success::before { content: '✅'; }
+
+        #nutritional-info p, #healthify-suggestions p { background-color: #f8f9fa; padding: 12px; border-radius: 8px; }
+        #healthify-suggestions p { border-left: 4px solid var(--success-color); }
+
+        #tasty-enrichment-section {
+            background-color: #fdfaf6;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-top: 4px solid var(--accent-color);
+        }
+        #tasty-enrichment-section h3 { color: var(--accent-color); }
+        .enrichment-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .enrichment-item span { font-size: 1.5rem; line-height: 1.2; }
+        .enrichment-item p { margin: 0; font-size: 0.95rem; }
+        .enrichment-item p strong { color: var(--primary-color); }
+
+        #loading, #error-message { display: none; margin-top: 20px; font-size: 1.1rem; color: #7f8c8d; background-color: white; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Culinary Compass</h1>
+            <p class="tagline">Decode Your Dish. Know What's on Your Plate.</p>
+        </header>
+        <div class="search-container">
+            <input type="text" id="dish-input" placeholder="Try 'Pho', 'Carbonara', 'Caesar Salad'...">
+            <button id="search-button">Analyze</button>
+        </div>
+        <div id="loading">Analyzing...</div>
+        <div id="error-message"></div>
+        <div class="results-card" id="results-card">
+            <img id="dish-image" src="" alt="Analyzed Dish Image">
+            <div class="result-content">
+                <h2 id="dish-name"></h2>
+                <div id="alerts-container"></div>
+                <div class="result-section" id="core-section"><h3>Protein & Core</h3><ul id="core-list"></ul></div>
+                <div class="result-section" id="aromatics-section"><h3>Aromatics & Vegetables</h3><ul id="aromatics-list"></ul></div>
+                <div class="result-section" id="spices-section"><h3>Spices & Seasonings</h3><ul id="spices-list"></ul></div>
+                <div class="result-section" id="liquids-section"><h3>Sauce & Liquids</h3><ul id="liquids-list"></ul></div>
+                <div class="result-section" id="garnish-section"><h3>Garnishes</h3><ul id="garnish-list"></ul></div>
+                <div class="result-section" id="nutritional-info"><h3>Nutritional Estimates</h3><p id="nutrition-text"></p></div>
+                <div class="result-section" id="healthify-suggestions"><h3>"Healthify It" Suggestions</h3><p id="suggestions-text"></p></div>
+                <div class="result-section" id="tasty-enrichment-section" style="display: none;">
+                    <h3>Tasty API Enrichment</h3>
+                    <div class="enrichment-item" id="fun-fact-item"><span>💡</span><p><strong>Fun Fact:</strong> <span id="fun-fact-text"></span></p></div>
+                    <div class="enrichment-item" id="chef-tip-item"><span>🧑‍🍳</span><p><strong>Chef's Tip:</strong> <span id="chef-tip-text"></span></p></div>
+                    <div class="enrichment-item" id="pairing-item"><span>🍷</span><p><strong>Perfect Pairing:</strong> <span id="pairing-text"></span></p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- API SIMULATION ---
+
+        // 1. Our Primary Database (Detailed analysis)
+        const fakeApiData = {
+            'pho bo': {
+                name: "Phở Bò (Vietnamese Beef Noodle Soup)",
+                alerts: [{ type: 'warning', text: 'Typically contains fish sauce (derived from fish).' }],
+                core: ['Rice Noodles (Bánh Phở)', 'Sliced Beef Brisket (Chín)', 'Beef Meatballs (Bò Viên)'],
+                aromatics: ['Onion (sliced)', 'Ginger (in broth)'],
+                spices: ['Star Anise', 'Cinnamon Stick', 'Cloves', 'Cardamom', 'Coriander Seed'],
+                liquids: ['Beef Bone Broth', 'Hoisin Sauce (for dipping)', 'Sriracha (for dipping)'],
+                garnishes: ['Bean Sprouts', 'Thai Basil', 'Scallions (chopped)', 'Lime Wedges', 'Sliced Jalapeños', 'Red Chilies'],
+                nutrition: '~450-600 cal for a large bowl. Rich in protein, moderate carbs.',
+                suggestions: 'Control sodium by using dipping sauces sparingly. Load up on fresh herbs and bean sprouts for fiber.'
+            },
+            'chicken tikka masala': {
+                name: "Chicken Tikka Masala",
+                alerts: [{ type: 'warning', text: 'DAIRY ALERT: Contains yogurt and heavy cream.' }],
+                core: ['Chicken Breast or Thighs'],
+                aromatics: ['Onion', 'Garlic', 'Ginger'],
+                spices: ['Garam Masala', 'Turmeric', 'Cumin', 'Coriander', 'Kashmiri Chili Powder'],
+                liquids: ['Tomato Purée', 'Yogurt (for marinade)', 'Heavy Cream or Coconut Milk'],
+                garnishes: ['Fresh Cilantro'],
+                nutrition: '~400-600 cal. High in fat due to cream.',
+                suggestions: 'Ask for coconut milk instead of cream for a lighter option. Pair with brown rice.'
+            },
+            'spaghetti carbonara': {
+                name: "Spaghetti Carbonara",
+                alerts: [{ type: 'warning', text: 'DAIRY, EGG, GLUTEN ALERT: Contains cheese, raw egg yolk, and wheat pasta.' }],
+                core: ['Spaghetti', 'Guanciale (cured pork jowl) or Pancetta', 'Large Egg Yolks'],
+                aromatics: ['Garlic (optional, lightly crushed)'],
+                spices: ['Coarsely Ground Black Pepper'],
+                liquids: ['Starchy Pasta Water'],
+                garnishes: ['Pecorino Romano Cheese (finely grated)'],
+                nutrition: '~500-700 cal. High in fat and carbs.',
+                suggestions: 'The traditional recipe does not use cream. Ask for less cured pork to reduce sodium.'
+            },
+            'margherita pizza': {
+                name: "Margherita Pizza",
+                alerts: [{ type: 'danger', text: 'GLUTEN & DAIRY ALERT: Contains wheat crust and mozzarella cheese.' }],
+                core: ['Pizza Dough (Type "00" flour)', 'Fresh Mozzarella Cheese'],
+                aromatics: [],
+                spices: ['Salt'],
+                liquids: ['San Marzano Tomato Sauce', 'Extra Virgin Olive Oil'],
+                garnishes: ['Fresh Basil Leaves'],
+                nutrition: '~250-350 cal per slice. High in carbohydrates.',
+                suggestions: 'A thin crust will have fewer calories. Add a side salad for a more balanced meal.'
+            },
+            'caesar salad': {
+                name: "Caesar Salad",
+                alerts: [{ type: 'danger', text: 'FISH, EGG, DAIRY, GLUTEN ALERT: Dressing has anchovies & raw egg. Contains cheese & croutons.' }],
+                core: ['Romaine Lettuce', 'Croutons', 'Grilled Chicken (optional)'],
+                aromatics: ['Garlic (in dressing)'],
+                spices: ['Black Pepper', 'Salt'],
+                liquids: ['Caesar Dressing (Egg yolk, olive oil, lemon juice, anchovies, dijon mustard)'],
+                garnishes: ['Shaved Parmesan Cheese'],
+                nutrition: '~300-600+ cal. High in fat from dressing and cheese.',
+                suggestions: 'Ask for dressing on the side. Add grilled chicken for protein. Hold croutons for GF.'
+            },
+            'california roll': {
+                name: "California Roll (Sushi)",
+                alerts: [{ type: 'warning', text: 'SHELLFISH, SOY, SESAME ALERT: Contains imitation crab (fish), soy sauce, sesame seeds.' }],
+                core: ['Sushi Rice', 'Nori (seaweed)', 'Imitation Crab (Surimi)', 'Avocado', 'Cucumber'],
+                aromatics: [],
+                spices: [],
+                liquids: ['Japanese Mayonnaise', 'Rice Vinegar (for rice)', 'Soy Sauce (for dipping)'],
+                garnishes: ['Toasted Sesame Seeds', 'Wasabi', 'Pickled Ginger'],
+                nutrition: '~250-350 cal per roll. Balanced macros.',
+                suggestions: 'Opt for low-sodium soy sauce. A generally healthy choice.'
+            },
+            'tacos al pastor': {
+                name: "Tacos al Pastor",
+                alerts: [{ type: 'warning', text: 'CORN ALERT: Tortillas are typically made from corn.' }],
+                core: ['Pork Shoulder', 'Corn Tortillas'],
+                aromatics: ['Onion', 'Garlic'],
+                spices: ['Achiote Paste', 'Guajillo Chiles', 'Ancho Chiles', 'Cumin', 'Oregano'],
+                liquids: ['Pineapple Juice', 'White Vinegar'],
+                garnishes: ['Diced Pineapple', 'Diced White Onion', 'Cilantro', 'Salsa', 'Lime Wedges'],
+                nutrition: '~150-250 cal per taco. Good source of protein.',
+                suggestions: 'Load up on the fresh onion, cilantro, and non-creamy salsas.'
+            },
+            'lentil soup': {
+                name: "Lentil Soup (Dal)",
+                alerts: [{ type: 'success', text: 'DIET INFO: Naturally vegetarian, vegan, and gluten-free.' }],
+                core: ['Brown or Green Lentils'],
+                aromatics: ['Onion', 'Carrots', 'Celery', 'Garlic'],
+                spices: ['Cumin', 'Coriander', 'Turmeric', 'Bay Leaf'],
+                liquids: ['Vegetable Broth', 'Diced Tomatoes'],
+                garnishes: ['Fresh Parsley or Cilantro', 'Lemon Wedge'],
+                nutrition: '~200-300 cal per bowl. Excellent source of fiber and plant-based protein.',
+                suggestions: 'A highly nutritious choice. Confirm no butter was used to ensure it is fully vegan.'
+            },
+            'pancakes': {
+                name: "Pancakes",
+                alerts: [{ type: 'danger', text: 'GLUTEN, EGG, & DAIRY ALERT: Batter contains wheat flour, eggs, and milk.' }],
+                core: ['All-Purpose Flour', 'Eggs'],
+                aromatics: [],
+                spices: ['Sugar', 'Salt'],
+                liquids: ['Milk or Buttermilk', 'Melted Butter'],
+                garnishes: ['Maple Syrup', 'Butter', 'Fresh Berries'],
+                nutrition: 'High in simple carbs. 300-800+ calories depending on toppings.',
+                suggestions: 'Top with fresh fruit instead of syrup to reduce sugar. Ask for butter on the side.'
+            },
+            'massaman curry': {
+                name: "Massaman Curry",
+                alerts: [{ type: 'danger', text: 'CRITICAL PEANUT ALLERGY ALERT: Contains peanuts in paste and garnish.' }],
+                core: ['Beef Chuck or Chicken Thighs', 'Potatoes'],
+                aromatics: ['Onion'],
+                spices: ['Massaman Curry Paste', 'Cinnamon', 'Star Anise', 'Cardamom', 'Bay Leaf'],
+                liquids: ['Coconut Milk', 'Tamarind Paste', 'Fish Sauce'],
+                garnishes: ['Roasted Peanuts', 'Crispy Shallots'],
+                nutrition: '~550-750 cal. Very high in fat from coconut milk and peanuts.',
+                suggestions: 'This is a rich dish. Ask for extra vegetables instead of extra potatoes.'
+            }
+        };
+
+        // 2. Simulated "Tasty API" (Enrichment data with ACCURATE photos)
+        const fakeTastyApiData = {
+            'pho bo': { 
+                image: 'https://vickypham.com/wp-content/uploads/2024/08/48f43-2023_06_09eosm506018.jpg',
+                funFact: 'Phở is considered the national dish of Vietnam and was popularized globally by refugees after the Vietnam War.',
+                chefTip: 'The key to a great bowl is the interactive experience. Add fresh garnishes like Thai basil, bean sprouts, and a squeeze of lime just before eating to customize the flavor.',
+                perfectPairing: 'Vietnamese iced coffee (cà phê sữa đá) or a light lager like Bia Saigon.'
+            },
+            'chicken tikka masala': { image: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?q=80&w=1080&auto=format&fit=crop' },
+            'spaghetti carbonara': { 
+                image: 'https://www.allrecipes.com/thmb/Vg2cRidr2zcYhWGvPD8M18xM_WY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/11973-spaghetti-carbonara-ii-DDMFS-4x3-6edea51e421e4457ac0c3269f3be5157.jpg' 
+            },
+            'margherita pizza': { image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=1080&auto=format&fit=crop' },
+            'caesar salad': { image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?q=80&w=1080&auto=format&fit=crop' },
+            'california roll': { image: 'https://images.unsplash.com/photo-1617196034183-421b4917c92d?q=80&w=1080&auto=format&fit=crop' },
+            'tacos al pastor': { 
+                image: 'https://www.jocooks.com/wp-content/uploads/2022/04/tacos-al-pastor-feature-1.jpg'
+            },
+            'lentil soup': { 
+                image: 'https://kindcooking.com/wp-content/uploads/2020/09/Depositphotos_186867868_s-2019.jpg' 
+            },
+            'pancakes': { image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1080&auto=format&fit=crop' },
+            'massaman curry': { 
+                image: 'https://static01.nyt.com/images/2024/01/10/multimedia/ND-Massaman-Curry-cwht/ND-Massaman-Curry-cwht-threeByTwoLargeAt2X.jpg'
+            }
+        };
+        // Add common Fun Facts, Tips, and Pairings to other meals
+        Object.keys(fakeApiData).forEach(key => {
+            if (fakeTastyApiData[key] && !fakeTastyApiData[key].funFact) {
+                fakeTastyApiData[key].funFact = "Each region has its own unique twist on this classic dish.";
+                fakeTastyApiData[key].chefTip = "Using the freshest ingredients is the key to unlocking the best flavor.";
+                fakeTastyApiData[key].perfectPairing = "A beverage that complements the dish's primary flavors.";
+            }
+        });
+
+        // --- Add aliases for easier searching
+        const aliases = {
+            'pizza': 'margherita pizza', 'sushi': 'california roll', 'tacos': 'tacos al pastor',
+            'pho': 'pho bo', 'carbonara': 'spaghetti carbonara', 'salad': 'caesar salad',
+            'curry': 'massaman curry', 'tikka masala': 'chicken tikka masala'
+        };
+        Object.keys(aliases).forEach(alias => {
+            const originalKey = aliases[alias];
+            fakeApiData[alias] = fakeApiData[originalKey];
+            fakeTastyApiData[alias] = fakeTastyApiData[originalKey];
+        });
+
+        // --- DOM Elements ---
+        const searchInput = document.getElementById('dish-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsCard = document.getElementById('results-card');
+        const loadingDiv = document.getElementById('loading');
+        const errorMessageDiv = document.getElementById('error-message');
+        const dishImageEl = document.getElementById('dish-image');
+        const dishNameEl = document.getElementById('dish-name');
+        const alertsContainer = document.getElementById('alerts-container');
+        const sectionMap = {
+            core: { section: document.getElementById('core-section'), list: document.getElementById('core-list') },
+            aromatics: { section: document.getElementById('aromatics-section'), list: document.getElementById('aromatics-list') },
+            spices: { section: document.getElementById('spices-section'), list: document.getElementById('spices-list') },
+            liquids: { section: document.getElementById('liquids-section'), list: document.getElementById('liquids-list') },
+            garnishes: { section: document.getElementById('garnish-section'), list: document.getElementById('garnish-list') }
+        };
+        const nutritionText = document.getElementById('nutrition-text');
+        const suggestionsText = document.getElementById('suggestions-text');
+        const tastySection = document.getElementById('tasty-enrichment-section');
+        const funFactText = document.getElementById('fun-fact-text');
+        const chefTipText = document.getElementById('chef-tip-text');
+        const pairingText = document.getElementById('pairing-text');
+
+        // --- Event Listeners ---
+        searchButton.addEventListener('click', () => performAnalysis(searchInput.value));
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') performAnalysis(searchInput.value);
+        });
+
+        function performAnalysis(query) {
+            const dishKey = query.trim().toLowerCase();
+            if (!dishKey) return;
+            resetUI();
+            loadingDiv.style.display = 'block';
+            setTimeout(() => {
+                const coreData = fakeApiData[dishKey];
+                const tastyData = fakeTastyApiData[dishKey];
+                loadingDiv.style.display = 'none';
+                if (coreData) {
+                    displayResults(coreData, tastyData);
+                } else {
+                    showError("Sorry, we couldn't find that dish. Try: Pizza, Sushi, Tacos, Pho, Carbonara, Caesar Salad, Pancakes, Lentil Soup, Tikka Masala, or Massaman Curry.");
+                }
+            }, 700);
+        }
+
+        function displayResults(coreData, tastyData) {
+            dishNameEl.textContent = coreData.name;
+            nutritionText.textContent = coreData.nutrition;
+            suggestionsText.textContent = coreData.suggestions;
+
+            alertsContainer.innerHTML = '';
+            coreData.alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${alert.type}`;
+                alertDiv.textContent = alert.text;
+                alertsContainer.appendChild(alertDiv);
+            });
+
+            populateList(sectionMap.core, coreData.core);
+            populateList(sectionMap.aromatics, coreData.aromatics);
+            populateList(sectionMap.spices, coreData.spices);
+            populateList(sectionMap.liquids, coreData.liquids);
+            populateList(sectionMap.garnishes, coreData.garnishes);
+
+            if (tastyData) {
+                dishImageEl.src = tastyData.image;
+                dishImageEl.alt = coreData.name;
+                dishImageEl.style.display = 'block';
+                funFactText.textContent = tastyData.funFact;
+                chefTipText.textContent = tastyData.chefTip;
+                pairingText.textContent = tastyData.perfectPairing;
+                tastySection.style.display = 'block';
+            } else {
+                dishImageEl.style.display = 'none';
+                tastySection.style.display = 'none';
+            }
+            resultsCard.style.display = 'block';
+        }
+        
+        function showError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+        }
+        
+        function populateList(sectionElements, items) {
+            if (items && items.length > 0) {
+                sectionElements.section.style.display = 'block';
+                const listEl = sectionElements.list;
+                listEl.innerHTML = '';
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    listEl.appendChild(li);
+                });
+            } else {
+                sectionElements.section.style.display = 'none';
+            }
+        }
+        
+        function resetUI() {
+            resultsCard.style.display = 'none';
+            errorMessageDiv.style.display = 'none';
+            loadingDiv.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
